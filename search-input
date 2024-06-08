@@ -1,0 +1,44 @@
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+
+const SearchInput = () => {
+    const [input, setInput] = useState('');
+    const [suggestions, setSuggestions] = useState([]);
+
+    useEffect(() => {
+        const fetchSuggestions = async () => {
+            if (input) {
+                try {
+                    const response = await axios.get(`http://localhost:5000/suggestions?query=${input}`);
+                    setSuggestions(response.data);
+                } catch (error) {
+                    console.error('Error fetching suggestions:', error);
+                }
+            } else {
+                setSuggestions([]);
+            }
+        };
+
+        const debounceFetch = setTimeout(fetchSuggestions, 300);
+
+        return () => clearTimeout(debounceFetch);
+    }, [input]);
+
+    return (
+        <div>
+            <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Type to search..."
+            />
+            <ul>
+                {suggestions.map((suggestion, index) => (
+                    <li key={index}>{suggestion}</li>
+                ))}
+            </ul>
+        </div>
+    );
+};
+
+export default SearchInput;
